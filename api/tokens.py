@@ -77,21 +77,27 @@ class TokenV2Handler(APIBaseHandler):
             try:
                 binascii.unhexlify(devicetoken)
             except Exception as ex:
+                # token string is not valid hex; reject immediately and don't fall
+                # through to the upsert below
                 self.send_response(BAD_REQUEST, dict(error="Invalid token"))
+                return
 
         token = EntityBuilder.build_token(devicetoken, device, self.appname, channel)
         try:
-            result = self.db.tokens.update(
+            # use update_one to avoid pymongo deprecation warnings and make intent
+            # clearer (single document upsert)
+            result = self.db.tokens.update_one(
                 {"device": device, "token": devicetoken, "appname": self.appname},
-                token,
+                {"$set": token},
                 upsert=True,
             )
-            # result
-            # {u'updatedExisting': True, u'connectionId': 47, u'ok': 1.0, u'err': None, u'n': 1}
-            if result["updatedExisting"]:
+            # update_one result has matched_count and upserted_id
+            if result.matched_count:
+                # an existing document was updated
                 self.add_to_log("Token exists", devicetoken)
                 self.send_response(OK)
             else:
+                # document inserted
                 self.add_to_log("Add token", devicetoken)
                 self.send_response(OK)
         except Exception as ex:

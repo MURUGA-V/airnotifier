@@ -27,6 +27,8 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import tornado.web
+import logging
+import time
 
 from controllers.base import *
 
@@ -65,3 +67,37 @@ class AppTokensHandler(WebBaseHandler):
         app = self.masterdb.applications.find_one({"shortname": appname})
         if not app:
             raise tornado.web.HTTPError(500)
+
+        # allow an administrator to manually register a token; parameters are
+        # intentionally the same as the REST API so that scripts and forms can
+        # share code
+        device = self.get_argument("device", DEVICE_TYPE_FCM).lower()
+        token_value = self.get_argument("token", "").strip()
+        channel = self.get_argument("channel", "default")
+
+        if not token_value:
+            # nothing supplied
+            self.redirect(f"/applications/{appname}/tokens")
+            return
+
+        # basic validation for ios tokens
+        if device == DEVICE_TYPE_IOS and len(token_value) != 64:
+            self.redirect(f"/applications/{appname}/tokens")
+            return
+
+        try:
+            self.db.tokens.update_one(
+                {"device": device, "token": token_value, "appname": appname},
+                {"$set": {
+                    "device": device,
+                    "token": token_value,
+                    "appname": appname,
+                    "channel": channel,
+                    "created": int(time.time()),
+                }},
+                upsert=True,
+            )
+        except Exception:
+            logging.exception("unable to upsert token from web UI")
+
+        self.redirect(f"/applications/{appname}/tokens")
