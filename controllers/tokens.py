@@ -26,71 +26,42 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from http.client import BAD_REQUEST, FORBIDDEN, NOT_FOUND, INTERNAL_SERVER_ERROR, OK
-from routes import route
-from api import APIBaseHandler, EntityBuilder
-from constants import DEVICE_TYPE_IOS, DEVICE_TYPE_FCM
-import binascii
-import logging
-from util import json_decode
+import tornado.web
+
+from controllers.base import *
 
 
-@route(r"/api/v2/tokens/([^/]+)")
-class TokenV2HandlerGet(APIBaseHandler):
-    def delete(self, token):
-        """Delete a token
-        """
-        # To check the access key permissions we use bitmask method.
-        if not self.can("delete_token"):
-            self.send_response(FORBIDDEN, dict(error="No permission to delete token"))
+@route(r"/applications/([^/]+)/tokens[\/]?")
+class AppTokensHandler(WebBaseHandler):
+    @tornado.web.authenticated
+    def get(self, appname):
+        self.appname = appname
+        app = self.masterdb.applications.find_one({"shortname": appname})
+        if not app:
+            raise tornado.web.HTTPError(500)
+        page = self.get_argument("page", None)
+        perpage = 50
+
+        token_id = self.get_argument("delete", None)
+        if token_id:
+            self.db.tokens.delete_one({"_id": ObjectId(token_id)})
+            self.redirect("/applications/%s/tokens" % appname)
             return
-
-        try:
-            result = self.db.tokens.delete_one({"token": token})
-            if result.deleted_count == 0:
-                self.send_response(NOT_FOUND, dict(status="Token does't exist"))
-            else:
-                self.send_response(OK, dict(status="deleted"))
-        except Exception as ex:
-            self.send_response(INTERNAL_SERVER_ERROR, dict(error=str(ex)))
-
-
-@route(r"/api/v2/tokens[\/]?")
-class TokenV2Handler(APIBaseHandler):
-    def post(self):
-        """Create a new token
-        """
-        if not self.can("create_token"):
-            self.send_response(FORBIDDEN, dict(error="No permission to create token"))
-            return
-
-        data = json_decode(self.request.body)
-
-        device = data.get("device", DEVICE_TYPE_FCM).lower()
-        channel = data.get("channel", "default")
-        devicetoken = data.get("token", "")
-
-        if device == DEVICE_TYPE_IOS:
-            if len(devicetoken) != 64:
-                self.send_response(BAD_REQUEST, dict(error="Invalid token"))
-                return
-            try:
-                binascii.unhexlify(devicetoken)
-            except Exception as ex:
-                self.send_response(BAD_REQUEST, dict(error="Invalid token"))
-
-        token = EntityBuilder.build_token(devicetoken, device, self.appname, channel)
-        try:
-            result = self.db.tokens.update_one(
-                {"device": device, "token": devicetoken, "appname": self.appname},
-                {"$set": token},
-                upsert=True,
+        if page:
+            tokens = (
+                self.db.tokens.find()
+                .sort("created", DESCENDING)
+                .skip(int(page) * perpage)
+                .limit(perpage)
             )
-            if result.matched_count > 0:
-                self.add_to_log("Token exists", devicetoken)
-                self.send_response(OK)
-            else:
-                self.add_to_log("Add token", devicetoken)
-                self.send_response(OK)
-        except Exception as ex:
-            self.send_response(INTERNAL_SERVER_ERROR, dict(error=str(ex)))
+        else:
+            page = 0
+            tokens = self.db.tokens.find().sort("created", DESCENDING).limit(perpage)
+        self.render("app_tokens.html", app=app, tokens=tokens, page=int(page))
+
+    @tornado.web.authenticated
+    def post(self, appname):
+        self.appname = appname
+        app = self.masterdb.applications.find_one({"shortname": appname})
+        if not app:
+            raise tornado.web.HTTPError(500)

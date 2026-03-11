@@ -2,14 +2,8 @@ import logging
 
 #  will choose the FIRST match it comes too
 #  or define routes in your controller using @route(r'')
-from controllers.tokens import AppTokensHandler
-from controllers.base import AppLogsHandler, AppObjectsHandler
-
 route_list = [
-    # Specific routes must come before generic ones
-    (r"/applications/([^/]+)/tokens", AppTokensHandler),
-    (r"/applications/([^/]+)/logs", AppLogsHandler),
-    (r"/applications/([^/]+)/objects", AppObjectsHandler),
+    # (r"/", my_controller.MyHandler ),
 ]
 
 
