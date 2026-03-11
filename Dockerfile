@@ -1,4 +1,5 @@
-FROM python:3.6
+FROM python:3.8
+
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive TERM=linux
@@ -11,14 +12,21 @@ RUN apt-get update && \
 RUN pip3 install pipenv
 
 RUN git clone -b 2.x https://github.com/airnotifier/airnotifier.git /airnotifier
+
 RUN mkdir -p /var/airnotifier/pemdir && \
     mkdir -p /var/log/airnotifier
 
-VOLUME ["/airnotifier", "/var/log/airnotifier", "/var/airnotifier/pemdir"]
 WORKDIR /airnotifier
 
-RUN pipenv install --deploy
+# Force reinstall pymongo with SRV support
+RUN pip3 install "pymongo[srv]>=3.6"
 
-ADD start.sh /airnotifier
-RUN chmod a+x /airnotifier/start.sh
-ENTRYPOINT /airnotifier/start.sh
+ADD Pipfile /airnotifier/Pipfile
+RUN pipenv install --skip-lock
+
+ADD start.sh /airnotifier/start.sh
+RUN chmod +x /airnotifier/start.sh
+
+VOLUME ["/var/log/airnotifier", "/var/airnotifier/pemdir"]
+
+ENTRYPOINT ["/airnotifier/start.sh"]
