@@ -151,7 +151,7 @@ class AppDeletionHandler(WebBaseHandler):
         app = self.masterdb.applications.find_one({"shortname": appname})
         if not app:
             raise tornado.web.HTTPError(500)
-        self.masterdb.applications.remove({"shortname": appname})
+        self.masterdb.applications.delete_one({"shortname": appname})
         self.mongodbconnection.drop_database(appname)
         self.redirect(r"/applications")
 
@@ -182,7 +182,7 @@ class AppLogViewHandler(WebBaseHandler):
         self.appname = appname
         now = int(time.time())
         thirtydaysago = now - 60 * 60 * 24 * 30
-        self.db.logs.remove({"created": {"$lt": thirtydaysago}})
+        self.db.logs.delete_many({"created": {"$lt": thirtydaysago}})
         self.redirect(r"/applications/%s/logs" % appname)
 
 
@@ -264,7 +264,7 @@ class AdminHandler(WebBaseHandler):
         if self.get_argument("delete", None):
             user_id = self.get_argument("delete", None)
             if user_id:
-                self.masterdb.managers.remove({"_id": ObjectId(user_id)})
+                self.masterdb.managers.delete_one({"_id": ObjectId(user_id)})
                 self.redirect("/admin/managers")
                 return
         currentuser_orgid = self.currentuser["orgid"]
@@ -296,7 +296,7 @@ class AdminHandler(WebBaseHandler):
                 user["orgid"] = int(self.get_argument("orgid", 0))
             else:
                 user["orgid"] = currentuser_orgid
-            result = self.masterdb.managers.update(
+            result = self.masterdb.managers.update_one(
                 {"email": user["email"]}, user, upsert=True
             )
             managers = self.masterdb.managers.find()
@@ -319,7 +319,7 @@ class AdminHandler(WebBaseHandler):
         elif action == "changepassword":
             password = self.get_argument("newpassword").strip()
             passwordhash = get_password(password, options.passwordsalt)
-            self.masterdb.managers.update(
+            self.masterdb.managers.update_one(
                 {"email": self.currentuser["email"]},
                 {"$set": {"password": passwordhash}},
             )
