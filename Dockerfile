@@ -11,20 +11,17 @@ RUN apt-get update && \
 
 RUN pip3 install pipenv
 
-RUN git clone -b 2.x https://github.com/airnotifier/airnotifier.git /airnotifier
-
-RUN mkdir -p /var/airnotifier/pemdir && \
+RUN mkdir -p /airnotifier && \
+    mkdir -p /var/airnotifier/pemdir && \
     mkdir -p /var/log/airnotifier
 
 WORKDIR /airnotifier
 
-# Force reinstall pymongo with SRV support
-RUN pip3 install "pymongo[srv]>=3.6"
+# Copy your repo files directly instead of cloning upstream
+COPY . /airnotifier/
 
-ADD Pipfile /airnotifier/Pipfile
 RUN pipenv install --skip-lock
 
-ADD start.sh /airnotifier/start.sh
 RUN chmod +x /airnotifier/start.sh
 
 VOLUME ["/var/log/airnotifier", "/var/airnotifier/pemdir"]
