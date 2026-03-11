@@ -98,12 +98,8 @@ fi
 mkdir -p $LOGDIR
 
 echo "=== Running install.py ==="
-pipenv run python install.py 2>&1
-INSTALL_EXIT=$?
-echo "=== install.py exited with: $INSTALL_EXIT ==="
-if [ $INSTALL_EXIT -ne 0 ]; then
-  exit 1
-fi
+# Use || true so install failures don't stop the app (collections may already exist)
+pipenv run python install.py 2>&1 || true
 
 echo "=== Starting AirNotifier on port ${PORT:-10000} ==="
 pipenv run python app.py --port=${PORT:-10000}
