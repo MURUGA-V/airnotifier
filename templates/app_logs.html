@@ -1,0 +1,69 @@
+{% extends "base.html" %} {% block navbar %} {{ modules.NavBar('applications')
+}} {% end %} {% block tabbaritems %} {{ modules.TabBar(app, 'logs') }} {% end %}
+{% block sidebaritems %} {{ modules.AppSideBar(app, 'logs') }} {% end %} {%
+block body %}
+<form class="form-horizontal" method="post" enctype="multipart/form-data">
+  <div class="form-actions">
+    <button type="submit" class="btn btn-danger">
+      Purge logs more than 30 days old
+    </button>
+  </div>
+</form>
+<div class="row-fluid">
+  <table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col text-break" style="width: 10%">{{ _('Action') }}</th>
+        <th scope="col">{{ _('Info') }}</th>
+        <th scope="col" style="width: 15%">{{ _('Time') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% from datetime import datetime %} {% for idx, log in enumerate(logs) %}
+      <tr>
+        <th scope="row">
+          <span class="label label-{{log['level']}}">{{log['action']}}</span>
+        </th>
+        <td>
+          <a
+            class="btn btn-info text-break"
+            data-toggle="collapse"
+            href="#log{{idx}}"
+            role="button"
+            aria-expanded="false"
+            aria-controls="log{{idx}}"
+            >{{ log['info'][0:50] }}</a
+          >
+          <div class="collapse multi-collapse" id="log{{idx}}">
+            <code>{{ log['info'] }}</code>
+          </div>
+        </td>
+        {% if 'created' in log %}
+        <td>
+          {{ datetime.fromtimestamp(log['created']).strftime("%d, %b %H:%M:%S")
+          }}
+        </td>
+        {% else %}
+        <td></td>
+        {% end %}
+      </tr>
+      {% end %}
+    </tbody>
+  </table>
+  <div>
+    {% if not (page == 0) %}
+    <a
+      class="btn"
+      href="/applications/{{app['shortname']}}/logs?page={{page - 1}}"
+      >{{ _('Previous') }}</a
+    >
+    {% end %}
+    <a
+      class="btn"
+      href="/applications/{{app['shortname']}}/logs?page={{page + 1}}"
+      >{{ _('Next') }}</a
+    >
+  </div>
+</div>
+<!--/row-->
+{% end %}

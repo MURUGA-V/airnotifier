@@ -1,0 +1,192 @@
+{% extends "base.html" %} {% block navbar %} {{ modules.NavBar('applications')
+}} {% end %} {% block sidebaritems %} {{ modules.AppSideBar({}, 'managers') }}
+{% end %} {% block body %} {% if updated %}
+<div class="alert alert-success">
+  User "{{updated['email']}}" updated.
+</div>
+{% end %} {% if created %}
+<div class="alert alert-success">
+  User "{{created['email']}} created.
+</div>
+{% end %}
+<section>
+  <div class="page-header">
+    <h1>{{ _('Managers') }}</h1>
+  </div>
+  <p>
+    <a
+      href="#addManager"
+      role="button"
+      class="btn btn-primary"
+      data-toggle="modal"
+    >
+      {{ _('Add manager') }}</a
+    >
+  </p>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>{{ _('Email') }}</th>
+        <th>{{ _('Actions') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in managers %}
+      <tr>
+        <td><strong>{{ m['email'] }}</strong></td>
+        <td>
+          {% if currentuser['email'] != m['email'] %}
+          <a class="btn btn-danger" href="/admin/managers?delete={{m['_id']}}"
+            ><i class="icon-trash icon-white"></i> {{ _('Delete') }}</a
+          >
+          {% else %}
+          <a
+            data-target="#changePassword"
+            data-toggle="modal"
+            role="button"
+            class="btn btn-outline-danger"
+          >
+            {{ _('Change password') }}</a
+          >
+          <strong>This is you</strong>
+          {% end %}
+        </td>
+      </tr>
+      {% end %}
+    </tbody>
+  </table>
+</section>
+<!--/section-->
+
+<!-- Modal -->
+<form class="form-horizontal" method="post" enctype="multipart/form-data">
+  <div
+    id="changePassword"
+    class="modal hide fade"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="myModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">{{ _('Change password') }}</h3>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-hidden="true"
+          >
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <fieldset>
+            <div class="form-group">
+              <label class="control-label" for="newpassword"
+                >{{ _('New password') }}</label
+              >
+              <div class="controls">
+                <input
+                  type="password"
+                  class="form-control"
+                  name="newpassword"
+                />
+                <input type="hidden" name="action" value="changepassword" />
+              </div>
+            </div>
+          </fieldset>
+        </div>
+        <div class="modal-barter">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">
+            Close
+          </button>
+          <button type="submit" class="btn btn-primary">
+            {{ _('Change password') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<form class="form-horizontal" method="post" enctype="multipart/form-data">
+  <div
+    id="addManager"
+    class="modal hide fade"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="addManagerLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="myModalLabel" class="modal-title">
+            {{ _('Add manager') }}
+          </h5>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-hidden="true"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <fieldset>
+            <div class="control-group">
+              <label class="control-label" for="orgid">{{ _('OrgId') }}</label>
+              <div class="controls">
+                <input type="text" class="input-xlarge" id="orgid" name="orgid"
+                value="{{currentuser['orgid']}}" {% if currentuser['orgid'] != 0
+                %} disabled {% end %} />
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="newemail"
+                >{{ _('Email') }}</label
+              >
+              <div class="controls">
+                <input
+                  type="email"
+                  class="input-xlarge"
+                  id="newemail"
+                  name="newemail"
+                />
+                <input type="hidden" name="action" value="createuser" />
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="newpassword"
+                >{{ _('Password') }}</label
+              >
+              <div class="controls">
+                <input
+                  type="password"
+                  class="input-xlarge"
+                  id="newpassword"
+                  name="newpassword"
+                />
+              </div>
+            </div>
+          </fieldset>
+        </div>
+        <div class="modal-barter">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">
+            Close
+          </button>
+          <button type="submit" class="btn btn-primary">
+            {{ _('Create') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% end %}

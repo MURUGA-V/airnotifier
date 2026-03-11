@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+{{ modules.NavBar('applications') }}
+{% end %}
+
+{% block sidebaritems %}
+{{ modules.AppSideBar(app, 'keys') }}
+{% end %}
+
+{% block body %}
+
+<form class="form-horizontal" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="appname" value="{{app['shortname']}}">
+    <input type="hidden" name="action" value="edit">
+    <fieldset>
+        <legend>{{ _('Edit access key') }}</legend>
+
+        <div class="control-group">
+            <label class="control-label" for="accesskey">{{ _('Access Key') }}</label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="accesskey" name="accesskey" value="{{ key['key'] }}" readonly="readonly">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="keydesc">{{ _('Description') }}</label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="keydesc" name="keydesc" value="{{ key['description'] }}">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="keycontact">{{ _('Contact Email') }}</label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" id="keycontact" name="keycontact" value="{{ key['contact'] }}">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">{{ _('Permissions') }}</label>
+            <div class="controls">
+				{% for k, value in map %}
+                <label class="checkbox">
+                    <input type="checkbox" name="permissions[]" value="{{ int(value[0]) }}"{% if value[0] & key['permission'] %} checked="checked"{% end %}>
+					<span>{{ value[1] }}</span>
+				</label>
+			    {% end %}
+
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ _('Generate') }}</button>
+        </div>
+    </fieldset>
+</form>
+
+{% end %}

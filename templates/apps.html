@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+{{ modules.NavBar('applications') }}
+{% end %}
+
+{% block sidebaritems %}
+{{ modules.AppSideBar({}, 'apps') }}
+{% end %}
+
+{% block body %}
+  {% if outdated %}
+  <div class="alert">
+      <strong>Your AirNotifier is outdated, please run upgrade.py</strong>
+  </div>
+  {% end %}
+  <div class="hero-unit">
+    <h1>AirNotifier</h1>
+    <p class="lead">Push Notifications Server for Human Beings.</p>
+    <p><a class="btn btn-primary btn-large" href="http://airnotifier.github.io">{{ _('Learn more') }} &raquo;</a></p>
+  </div>
+{% end %}

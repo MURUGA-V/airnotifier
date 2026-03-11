@@ -1,0 +1,55 @@
+{% extends "base.html" %} {% block sidebaritems %} {{ modules.AppSideBar({},
+'createapp') }} {% end %} {% block navbar %} {{ modules.NavBar('applications')
+}} {% end %} {% block body %}
+<form method="post" enctype="multipart/form-data">
+  <fieldset>
+    <legend>{{ _('Create new app') }}</legend>
+
+    {% if currentuser['orgid'] == 0 %}
+    <div class="form-group">
+      <label class="control-label" for="orgid">OrgId</label>
+      <div class="controls">
+        <input
+          type="text"
+          class="input-xlarge"
+          id="orgid"
+          name="orgid"
+          value="0"
+        />
+      </div>
+    </div>
+    {% end %}
+
+    <div class="form-row">
+      <div class="col">
+        <label class="control-label" for="shortnameinput">App short name</label>
+        <div class="controls">
+          <input
+            type="text"
+            class="form-control"
+            id="shortnameinput"
+            name="appshortname"
+            value=""
+          />
+          <p class="help-block">Unique identifier for your app.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label" for="appdescription">Description</label>
+      <div class="controls">
+        <textarea
+          class="form-control"
+          id="appdescription"
+          rows="3"
+          name="appdescription"
+        ></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{ _('Save') }}</button>
+  </fieldset>
+</form>
+
+{% end %}

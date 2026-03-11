@@ -1,0 +1,223 @@
+{% extends "base.html" %} {% block navbar %} {{ modules.NavBar('applications')
+}} {% end %} {% block tabbaritems %} {{ modules.TabBar(app, 'settings') }} {%
+end %} {% block sidebaritems %} {{ modules.AppSideBar(app, 'settings') }} {% end
+%} {% block body %} {% if 'error' in globals() %}
+<div class="alert">
+  <strong>{{ error }}</strong>
+</div>
+{% end %}
+
+<form id="form-app-settings" method="post">
+  <input type="hidden" name="appname" value="{{app['shortname']}}" />
+  <fieldset>
+    <legend>{{ _('General') }}</legend>
+
+    <div class="form-row">
+      <div class="col">
+        <input
+          type="text"
+          class="form-control"
+          id="shortname"
+          readonly="readonly"
+          value="{{app['shortname']}}"
+        />
+        <small class="form-text text-muted">shortname</small>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="col">
+        <label class="control-label" for="keydesc"
+          >{{ _('Blocked IP list') }}</label
+        >
+        <textarea
+          rows="3"
+          class="form-control"
+          id="ipaddr"
+          name="blockediplist"
+        >
+{{ app.get('blockediplist', '') }}</textarea
+        >
+      </div>
+
+      <div class="col">
+        <label class="control-label" for="appdescription">Description</label>
+        <textarea
+          class="form-control"
+          id="appdescription"
+          rows="3"
+          name="appdescription"
+        >
+{{app.get('description', '')}}</textarea
+        >
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">{{ _('Apply') }}</button>
+  </fieldset>
+</form>
+
+<hr />
+
+<form class="form-horizontal" method="post" enctype="multipart/form-data">
+  <fieldset>
+    <legend>{{ _('Firebase Cloud Messaging settings') }}</legend>
+
+    <div class="form-row">
+      <div class="col">
+        <label class="control-label" for="form-element-fcm">
+          {{ _('Project ID') }}</label
+        >
+        <input
+          type="text"
+          class="form-control"
+          id="form-element-fcm"
+          name="fcm-project-id"
+          value="{{app.get('fcm-project-id', '')}}"
+        />
+      </div>
+
+      <div class="col">
+        <label class="control-label" for="form-element-jsonkey"
+          >{{ _('JSON key') }}</label
+        >
+        <textarea
+          rows="3"
+          class="form-control"
+          id="form-element-jsonkey"
+          name="fcm-jsonkey"
+        >
+{{ app.get('fcm-jsonkey', '') }}</textarea
+        >
+        <p class="form-text text-muted">
+          <a
+            href="https://console.firebase.google.com/project/_/settings/serviceaccounts/adminsdk"
+            >Get json key</a
+          >
+        </p>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{ _('Save') }}</button>
+  </fieldset>
+</form>
+
+<hr />
+
+<form class="form-horizontal" id="form-apns-settings" method="post">
+  <fieldset>
+    <legend>{{ _('APNs HTTP/2') }}</legend>
+    <div class="form-row">
+      <div class="col">
+        <div class="form-group">
+          <label class="control-label" for="form-element-apns-team-id">
+            {{ _('Team ID') }}</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="form-element-apns-team-id"
+            name="apns-team-id"
+            value="{{app.get('apns-team-id', '')}}"
+          />
+          <p class="form-text text-muted">
+            <a href="https://developer.apple.com/account/#/membership"
+              >Find team id from membership page</a
+            >
+          </p>
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-group">
+          <label class="control-label" for="form-element-apns-bundle-id">
+            {{ _('App bundle ID') }}</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="form-element-apns-bundle-id"
+            name="apns-bundle-id"
+            placeholder="com.airnotifier.mobile"
+            value="{{app.get('apns-bundle-id', '')}}"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col">
+        <div class="form-group">
+          <label class="control-label" for="form-element-apns-key-id">
+            {{ _('Key ID') }}</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="form-element-apns-key-id"
+            name="apns-key-id"
+            value="{{app.get('apns-key-id', '')}}"
+          />
+        </div>
+      </div>
+
+      <div class="col">
+        <label class="control-label" for="form-element-apns-auth-key"
+          >{{ _('Auth key (content of .p8 file)') }}</label
+        >
+        <textarea
+          rows="3"
+          class="form-control"
+          id="form-element-apns-auth-key"
+          name="apns-auth-key"
+        >
+ {{ app.get('apns-auth-key', '') }}</textarea
+        >
+        <p class="form-text text-muted">
+          <a href="https://developer.apple.com/account/resources/authkeys/list"
+            >Get auth key</a
+          >
+        </p>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">{{ _('Save') }}</button>
+  </fieldset>
+</form>
+
+<hr />
+
+<form class="form-horizontal" id="form-wns-settings" method="post">
+  <fieldset>
+    <legend>{{ _('WNS settings') }}</legend>
+
+    <div class="form-row">
+      <div class="col">
+        <label class="control-label" for="form-element-wnsclientid">
+          {{ _('Client ID') }}</label
+        >
+        <input
+          type="text"
+          class="form-control"
+          id="form-element-wnsclientid"
+          name="wnsclientid"
+          value="{{app.get('wnsclientid', '')}}"
+        />
+        <small class="form-text text-muted">Client ID</small>
+      </div>
+
+      <div class="col">
+        <label class="control-label" for="form-element-wnsclientsecret"
+          >{{ _('Client secret') }}</label
+        >
+        <input
+          type="text"
+          class="form-control"
+          id="form-element-wnsclientsecret"
+          name="wnsclientsecret"
+          value="{{app.get('wnsclientsecret', '')}}"
+        />
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{ _('Save') }}</button>
+  </fieldset>
+</form>
+
+{% end %}
