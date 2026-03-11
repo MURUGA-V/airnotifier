@@ -3,7 +3,7 @@ ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive TERM=linux
 
-EXPOSE 10000
+EXPOSE 8000
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git ca-certificates

@@ -34,5 +34,5 @@ if [ $INSTALL_EXIT -ne 0 ]; then
   exit 1
 fi
 
-echo "=== Starting AirNotifier on port ${PORT:-10000} ==="
-pipenv run python app.py --port=${PORT:-10000}
+echo "=== Starting AirNotifier on port ${PORT:-8000} ==="
+pipenv run python app.py --port=${PORT:-8000}
