@@ -19,7 +19,7 @@ class Dao:
         return self.masterdb.applications.find_one({"shortname": name})
 
     def update_app_by_name(self, name: str, app: Dict[str, str]):
-        self.masterdb.applications.update_one({"shortname": name}, app)
+        self.masterdb.applications.update_one({"shortname": name}, {"$set": app})
 
     def find_token(self, token):
         logging.info("find token: %s" % token)
