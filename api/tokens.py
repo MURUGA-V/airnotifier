@@ -46,8 +46,8 @@ class TokenV2HandlerGet(APIBaseHandler):
             return
 
         try:
-            result = self.db.tokens.remove({"token": token})
-            if result["n"] == 0:
+            result = self.db.tokens.delete_one({"token": token})
+            if result.deleted_count == 0:
                 self.send_response(NOT_FOUND, dict(status="Token does't exist"))
             else:
                 self.send_response(OK, dict(status="deleted"))
