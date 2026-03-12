@@ -113,7 +113,19 @@ class PushHandler(APIBaseHandler):
             if device.endswith(DEVICE_TYPE_FCM):
                 fcm = request_dict.get("fcm", {})
                 try:
-                    fcmconn = self.fcmconnections[self.app["shortname"]][0]
+                    fcm_conns = self.fcmconnections.get(self.app["shortname"], [])
+                    if not fcm_conns:
+                        logging.error(
+                            "No FCM connection available for app '%s'. "
+                            "Check that Firebase credentials are correctly configured and the service was restarted."
+                            % self.app["shortname"]
+                        )
+                        self.send_response(
+                            INTERNAL_SERVER_ERROR,
+                            dict(error="FCM is not configured for this app"),
+                        )
+                        return
+                    fcmconn = fcm_conns[0]
                     await fcmconn.process(token=self.token, alert=alert, fcm=fcm)
                 except Exception as ex:
                     statuscode = ex.code

@@ -98,12 +98,12 @@ class APIBaseHandler(tornado.web.RequestHandler):
             self.send_response(BAD_REQUEST, dict(error="app key is required"))
 
         self.token = self.get_argument("token", None)
-        self.device = self.get_argument("device", DEVICE_TYPE_IOS).lower()
+        self.device = self.get_argument("device", DEVICE_TYPE_FCM).lower()
         if self.device == DEVICE_TYPE_IOS and self.token:
             if len(self.token) != 64:
                 # hack until we resolve some bugs at the moodle side
                 if len(self.token) > 64:
-                    self.device = DEVICE_TYPE_ANDROID
+                    self.device = DEVICE_TYPE_FCM
                 else:
                     self.send_response(BAD_REQUEST, dict(error="Invalid token"))
                     return
@@ -113,8 +113,9 @@ class APIBaseHandler(tornado.web.RequestHandler):
                 except Exception as ex:
                     self.send_response(BAD_REQUEST, dict(error="Invalid token"))
         else:
-            # if it's not ios then we force android type device here
-            self.device = DEVICE_TYPE_ANDROID
+            # Preserve fcm/wns device types; fall back to fcm for unknown types
+            if self.device not in [DEVICE_TYPE_FCM, DEVICE_TYPE_ANDROID, DEVICE_TYPE_WNS]:
+                self.device = DEVICE_TYPE_FCM
 
         self.app = self.dao.find_app_by_name(self.appname)
 

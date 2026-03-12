@@ -33,13 +33,21 @@ def init_messaging_agents(masterdb):
                     appname=appname,
                     instanceid=0,
                 )
+                services["fcm"][appname].append(fcminstance)
+                logging.info("FCMClient initialized for app: %s" % appname)
             except Exception as ex:
                 import traceback
 
                 traceback_ex = traceback.format_exc()
-                logging.error("%s " % (traceback_ex))
-                continue
-            services["fcm"][appname].append(fcminstance)
+                logging.error(
+                    "FCMClient FAILED to initialize for app '%s' — push notifications will not work for this app. "
+                    "Check your Firebase Project ID and JSON key. Error: %s" % (appname, traceback_ex)
+                )
+        else:
+            logging.warning(
+                "App '%s' is missing FCM credentials (fcm-project-id or fcm-jsonkey). "
+                "FCM push notifications are disabled for this app." % appname
+            )
 
         """ APNs setup """
         services["apns"][appname] = []
